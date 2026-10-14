@@ -34,30 +34,37 @@
 | 查余额 | 调用前先查 | 免费 |
 | 历史发文列表 | 取全部文章（约10篇/页） | 0.05 元/页 |
 | 互动指标 data2 | 阅读+点赞+在看+评论+分享 | 0.03 元/篇 |
-| 搜公众号 | 只有名称时用它拿 wxid | 0.10 元/次 |
+| 搜公众号 | 只有名称时用它拿 wxid | 0.10 元/**次（一次性，可省）** |
+
+> 省钱提示：**搜公众号那 0.10 元是一次性的**，而且只在“你只给了名称没给 wxid”时才会发生——用免费工具 https://www.cimidata.com/tools/wxid 自查 wxid 贴过来就能完全省掉；正文直抓也免费。真正按量累计的只有“历史列表”和（可选的）“互动指标”。动手前会把整单预计总价一次算清给你，同意才执行。
 
 ---
 
-## 三、四步跑完
+## 三、跑完流程（步骤0 免费提 wxid，再按需付费）
 
 ```bash
 export APP_ID="你的app_id"
 export APP_SECRET="你的app_secret"
 
-# 步骤1  取全部历史发文（计费）→ articles.json
-python scripts/cimi_client.py history gh_xxxx articles.json
+# 步骤0  先要一条该公众号的文章链接，免费提取 wxid（不走付费接口）
+#        GET 该链接，搜 var user_name，gh_ 开头即 wxid；或直接拿用户给的 wxid
 
-# 步骤2  免登录直抓正文（免费）→ 输出目录（每篇一个 .md）
+# 步骤1  取全部历史发文（计费）→ articles.json
+python scripts/cimi_client.py history <wxid> articles.json
+
+# 步骤2  免登录直抓正文（免费）→ 输出目录（每篇一个 .md，含图文/小绿书）
 python scripts/scrape_content.py articles.json ./文章存档 --sleep 1.0
 
-# 步骤3  取互动指标（计费）→ metrics.json
+# 步骤3  取互动指标（计费，可选）→ metrics.json
 python scripts/cimi_client.py data2 articles.json metrics.json
 
-# 步骤4  汇总成表 → 文章汇总表.xlsx / .csv
+# 步骤4  汇总成表（免费）→ 文章汇总表.xlsx / .csv
 python scripts/build_report.py articles.json ./文章存档 metrics.json -o 文章汇总表
 ```
 
 只想存正文不买指标，就跑步骤 1+2+4（步骤4 的 metrics.json 省略即可，指标列显示“—”）。
+
+**每一步付费前都会按三段式跟你确认**：`1、执行的逻辑 2、收费标准 3、这次预计要花多少钱`。参考：历史列表 0.05 元/页（约10篇/页，300篇≈1.5元、500篇≈2.5元）；互动指标 0.03 元/篇（300篇≈9元、500篇≈15元）；**提 wxid 和下载正文都免费**。
 
 ---
 
