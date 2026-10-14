@@ -1,4 +1,4 @@
-# wechat-gzh-archive · 微信公众号全量采集与存档
+# gzh-research · 微信公众号全量采集与存档
 
 把一个公众号的全部历史文章抓下来、存成 Markdown，并汇总成带「内容分类 / 类型 / 阅读·点赞·在看·评论·分享」的 Excel/CSV 表格。
 

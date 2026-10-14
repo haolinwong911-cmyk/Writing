@@ -1,5 +1,5 @@
 ---
-name: wechat-gzh-archive
+name: gzh-research
 description: 端到端采集并存档一个微信公众号的全部历史文章。用次幂数据(cimidata)付费 API 取发文列表和阅读/点赞/在看/评论/分享指标，免登录直抓 mp.weixin.qq.com 正文（严格区分「普通图文文章」与「小绿书/图片消息」两种页面结构），多标签内容分类，最终汇总成带指标和分类的 Excel/CSV 表格。当用户要求「采集/爬取某个公众号的全部历史文章并存档」「拉公众号发文+阅读量等数据做成表格」「导出公众号文章为 Markdown」时使用本 skill。涉及次幂付费接口，调用前必须先向用户报价并确认。
 agent_created: true
 ---
