@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>黄同学的微信排版神器</title>
+  <style>
+    :root { --ink:#202124; --muted:#8b8e94; --orange:#fa8c16; --paper:#fffdf9; --line:#e9e4dc; --canvas:#f5f3ef; }
+    * { box-sizing:border-box; }
+    body { margin:0; overflow:hidden; color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--canvas); }
+    button { font:inherit; cursor:pointer; }
+    .top { position:sticky; top:0; z-index:3; display:flex; align-items:center; justify-content:flex-start; gap:20px; padding:12px 24px; background:rgba(255,253,249,.94); border-bottom:1px solid var(--line); backdrop-filter:blur(12px); }
+    .brand { display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.3px; }
+    .dot { width:24px; height:24px; border-radius:7px; background:var(--orange); box-shadow:7px 7px 0 #ffe1bd; }
+    .actions { display:flex; align-items:center; gap:8px; }
+    .paste-trigger { border:1px solid #f5c48c; border-radius:9px; padding:9px 12px; background:#fff7ec; color:#9b5b12; font-size:13px; font-weight:650; }
+    .paste-panel { display:none; width:min(100%,677px); margin:0 auto 14px; padding:16px; border:1px solid #eadfce; border-radius:12px; background:#fff; box-shadow:0 6px 20px rgba(77,62,38,.06); }
+    .paste-panel.open { display:block; }
+    .paste-panel-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
+    .paste-panel-head strong { font-size:14px; }
+    .paste-panel p { margin:0 0 10px; color:#847c71; font-size:12px; line-height:1.6; }
+    #pasteInput { width:100%; min-height:150px; padding:12px; border:1px solid #e6dfd5; border-radius:8px; outline:none; resize:vertical; font:14px/1.7 inherit; }
+    #pasteInput:focus { border-color:#f4b76e; }
+    .paste-controls { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; }
+    .paste-options { display:flex; align-items:center; gap:7px; color:#71695f; font-size:12px; }
+    .paste-options input { accent-color:var(--orange); }
+    .button.small { padding:7px 10px; font-size:12px; }
+    .button { border:1px solid #ded8cf; border-radius:9px; padding:9px 12px; background:#fff; color:#48423b; font-size:13px; }
+    .button.primary { background:var(--orange); border-color:var(--orange); color:#fff; font-weight:650; }
+    .layout { width:100%; height:100vh; margin:0; display:grid; grid-template-columns:270px minmax(0,1fr) minmax(330px,390px); min-height:0; overflow:hidden; }
+    .layout > aside:first-child { position:relative; top:auto; align-self:stretch; height:100vh; min-height:0; overflow-y:auto; padding:20px 22px 28px; border-right:1px solid var(--line); background:#faf8f4; }
+    .sidebar-brand { margin:-20px -22px 20px; padding:18px 20px; border-bottom:1px solid var(--line); background:var(--paper); }
+    .sidebar-brand .brand { font-size:17px; line-height:1.35; }
+    .sidebar-brand .dot { flex:0 0 24px; }
+    .sidebar-brand #copy { width:100%; margin-top:14px; padding:11px 12px; }
+    .eyebrow { margin:0 0 10px; color:var(--orange); font-size:11px; font-weight:800; letter-spacing:1.2px; }
+    h1 { margin:0 0 10px; font-size:22px; letter-spacing:-.5px; }
+    .intro { margin:0 0 22px; color:#77716a; font-size:13px; line-height:1.7; }
+    .palette { display:grid; gap:7px; }
+    .tool { display:flex; align-items:center; gap:10px; width:100%; padding:10px; border:1px solid transparent; border-radius:9px; background:transparent; text-align:left; color:#4d4740; font-size:13px; }
+    .tool:hover { background:#fff; border-color:var(--line); }
+    .tool b { display:grid; width:24px; color:var(--orange); font-size:15px; place-items:center; }
+    .rules { margin-top:28px; padding-top:20px; border-top:1px solid var(--line); }
+    .rules h2 { margin:0 0 10px; font-size:13px; }
+    .rules p { margin:0 0 7px; color:#77716a; font-size:12px; line-height:1.55; }
+    .workspace { height:100vh; min-height:0; padding:24px clamp(16px,2.4vw,42px); overflow-y:auto; overflow-x:hidden; }
+    .workspace-tools { display:none; position:sticky; top:56px; z-index:2; padding:8px 12px; background:#faf8f4; border-bottom:1px solid var(--line); }
+    .status { display:flex; align-items:center; gap:7px; margin-bottom:16px; color:#78736c; font-size:12px; }
+    .status i { width:7px; height:7px; border-radius:50%; background:#49a66e; }
+    .paper { width:min(100%, 677px); margin:0 auto; padding:38px 30px 56px; background:var(--paper); box-shadow:0 6px 30px rgba(77,62,38,.07); }
+    .article-title { width:100%; margin:0 0 22px; padding:0; border:0; outline:none; background:transparent; font-family:inherit; color:#171717; font-size:28px; font-weight:750; letter-spacing:-.8px; line-height:1.35; }
+    .article-title::placeholder { color:#c2bbb0; }
+    #editor { min-height:680px; outline:none; color:#333; font-family:"PingFang SC",-apple-system,"Microsoft YaHei",sans-serif; font-size:15px; font-weight:400; letter-spacing:1px; line-height:1.85; text-align:justify; }
+    #editor p { margin:0 0 20px; }
+    #editor h2 { margin:36px 0 20px; padding-left:10px; border-left:4px solid var(--orange); color:#111; font-size:20px; font-weight:700; letter-spacing:1px; line-height:1.35; }
+    #editor h3 { margin:27px 0 12px; color:#222; font-size:18px; font-weight:700; line-height:1.4; }
+    #editor strong, #editor .orange-strong { color:var(--orange); font-weight:700; }
+    #editor figure { margin:26px 0 20px; }
+    #editor img { display:block; width:100%; height:auto; }
+    #editor img.image-narrow, .phone-content #preview img.image-narrow { width:311px; max-width:100%; margin:0 auto; }
+    #editor figcaption { display:block; margin:8px 0 0; color:#b2b2b2; font-size:12px; font-weight:400; letter-spacing:.5px; line-height:1.65; text-align:center; }
+    #editor p.caption { display:block; margin:0 0 20px; color:#b2b2b2; font-size:12px; font-weight:400; letter-spacing:.5px; line-height:1.85; text-align:center; }
+    #editor .image-slot { display:flex; align-items:center; justify-content:center; width:100%; min-height:150px; border:1px dashed #d8b47e; background:#fff8ed; color:#b98640; font-size:13px; letter-spacing:.5px; text-align:center; }
+    #editor .image-slot span { padding:8px 12px; border-radius:99px; background:#ffe8c8; }
+    #editor a { color:inherit; text-decoration:underline; text-decoration-color:#ffc47b; text-underline-offset:3px; }
+    #editor ul, #editor ol { margin:0 0 20px; padding-left:22px; }
+    .phone-area { position:relative; inset:auto; width:auto; height:100vh; min-width:0; overflow:hidden; padding:20px 14px; border-left:1px solid var(--line); background:#f7f5f1; }
+    .phone-title { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+    .phone-title h2 { margin:0; font-size:14px; }
+    .phone-title span { color:#8b857d; font-size:12px; }
+    .phone { width:min(100%, 354px, calc((100vh - 132px) * .433)); aspect-ratio:1220 / 2816; height:auto; min-height:0; margin:0 auto; overflow:hidden; border:9px solid #252525; border-radius:32px; background:#fff; box-shadow:0 14px 30px rgba(0,0,0,.14); }
+    .phone-bar { height:42px; padding:12px 15px; color:#333; font-size:11px; text-align:center; }
+    .phone-content { padding:14px 17px 30px; transform-origin:top left; height:calc(100% - 42px); overflow-y:scroll; overscroll-behavior:contain; }
+    .phone-content h1 { margin:0 0 16px; color:#111; font-size:21px; line-height:1.35; }
+    .phone-content #preview { color:#333; font-family:"PingFang SC",-apple-system,"Microsoft YaHei",sans-serif; font-size:15px; letter-spacing:1px; line-height:1.85; text-align:justify; will-change:auto; }
+    .phone-content #preview p { margin:0 0 20px; }
+    .phone-content #preview h2 { margin:34px 0 19px; padding-left:9px; border-left:4px solid var(--orange); color:#111; font-size:20px; line-height:1.35; }
+    .phone-content #preview h3 { margin:26px 0 12px; font-size:18px; line-height:1.4; }
+    .phone-content #preview strong, .phone-content #preview .orange-strong { color:var(--orange); font-weight:700; }
+    .phone-content #preview figure { margin:26px 0 20px; }
+    .phone-content #preview img { display:block; width:100%; height:auto; }
+    .phone-content #preview figcaption { display:block; margin:8px 0 0; color:#b2b2b2; font-size:12px; letter-spacing:.5px; line-height:1.65; text-align:center; }
+    .phone-content #preview p.caption { display:block; margin:0 0 20px; color:#b2b2b2; font-size:12px; letter-spacing:.5px; line-height:1.85; text-align:center; }
+    .phone-content #preview .image-slot { display:flex; align-items:center; justify-content:center; min-height:105px; border:1px dashed #d8b47e; background:#fff8ed; color:#b98640; font-size:12px; text-align:center; }
+    .phone-content #preview .image-slot span { padding:7px 9px; border-radius:99px; background:#ffe8c8; }
+    .toast { position:fixed; right:24px; bottom:24px; z-index:10; padding:11px 14px; border-radius:10px; background:#222; color:#fff; font-size:13px; opacity:0; transform:translateY(8px); transition:.2s; pointer-events:none; }
+    .toast.show { opacity:1; transform:translateY(0); }
+    #editor .annotation { color:var(--orange); font-weight:700; }
+    #editor span.caption, .phone-content #preview span.caption { color:#b2b2b2; font-size:12px; font-weight:400; letter-spacing:.5px; }
+    #editor .centered-text { text-align:center; }
+    #editor .subheading-text, #preview .subheading-text { display:inline-flex; align-items:center; gap:8px; max-width:100%; color:#222; font-size:20px; font-weight:700; line-height:1.35; vertical-align:middle; }
+    #editor .subheading-mark, #preview .subheading-mark { display:inline-block; flex:0 0 4px; align-self:stretch; min-height:1em; background:#fa8c16; }
+    #editor .subheading-label, #preview .subheading-label { min-width:0; }
+    #editor .plain-text, #preview .plain-text { color:#333; font-size:15px; font-weight:400; letter-spacing:1px; line-height:inherit; font-style:normal; text-decoration:none; }
+    #editor p.centered-block, #preview p.centered-block, #editor p.caption-center, #preview p.caption-center { text-align:center !important; }
+    .phone-content #preview .centered-text { text-align:center; }
+    .phone-content #preview .subheading-text { color:#222; font-size:20px; font-weight:700; line-height:1.45; }
+    @media (max-width:1120px) and (min-width:901px) { .layout{grid-template-columns:235px minmax(0,1fr) 320px;} .layout > aside:first-child{padding-left:17px;padding-right:17px;} .sidebar-brand{margin-left:-17px;margin-right:-17px;} .workspace{padding:22px 16px;} .phone-area{padding:18px 10px;} }
+    @media (max-width:900px) { body{overflow:auto;} .layout{height:auto;min-height:100vh;overflow:visible;grid-template-columns:220px minmax(0,1fr);} .layout > aside:first-child,.workspace{height:100vh;} .phone-area{display:none;} }
+    @media (max-width:700px) { .layout{display:block;} .layout > aside:first-child{display:none;} .workspace-tools{display:block;} .workspace{height:auto;min-height:100vh;padding:18px 0;} .paper{padding:28px 22px;box-shadow:none;} }
+  </style>
+</head>
+<body>
+  <main class="layout">
+    <aside>
+      <div class="sidebar-brand"><div class="brand"><span class="dot"></span>黄同学的微信排版神器</div><button class="button primary" id="copy">复制到公众号</button></div>
+      <p class="eyebrow">组件库</p><h1>按你的文章习惯写</h1><p class="intro">选中文字后点击样式按钮，即可转换成对应的公众号格式。</p>
+      <div class="palette">
+        <button class="tool" data-action="subheading"><b>h</b>小节标题</button><button class="tool" data-action="emphasis"><b>●</b>橙色重点金句</button><button class="tool" data-action="paragraph"><b>¶</b>正文段落</button><button class="tool" data-action="center"><b>↔</b>正文段落居中</button><button class="tool" data-action="caption"><b>≡</b>灰色标注</button>
+      </div>
+      <div class="rules"><h2>已提炼的固定规则</h2><p>正文 15px / 深灰 / 1px 字距</p><p>小标题左橙线、上 36px 下 20px</p><p>重点只标短语或小分句，橙色加粗</p><p>图注 12px 灰色、居中</p><p>图片按正文宽度铺满，不加圆角</p></div>
+    </aside>
+    <section class="workspace"><div class="workspace-tools"><button class="paste-trigger" id="openPasteMobile">粘贴文章，自动排版</button></div><div class="status"><i></i><span id="saveStatus">正在本地编辑 · 实时同步预览</span></div><div id="pastePanel" class="paste-panel"><div class="paste-panel-head"><strong>粘贴文章内容</strong><button class="button small" id="closePaste">收起</button></div><p>把纯文本和图片一起粘贴到下面。保留原有内容顺序，我会按小标题、正文、重点和图注规则整理成文章。</p><textarea id="pasteInput" placeholder="在这里粘贴纯文本和图片（可直接 Ctrl/⌘+V）"></textarea><div class="paste-controls"><label class="paste-options"><input type="checkbox" id="detectHeadings" checked />自动识别独立成行的小标题</label><button class="button primary small" id="formatPaste">排版并载入文章</button></div></div><article class="paper"><input id="title" class="article-title" value="用一个编辑器，把公众号排版变成顺手的事" aria-label="文章标题" /><div id="editor" contenteditable="true"><p>把内容贴进来，排版应该是一件轻松的事。正文保持自然呼吸，不需要过多装饰。</p><h2>01 先把文章结构搭好</h2><p>每一个大分段都用清晰的小标题开启。你的参考文章里，标题有充足的留白和一条稳定的橙色左线，读者能快速知道自己读到了哪里。</p><p>真正需要读者记住的部分，不是整段加粗，而是<strong>从长句中拎出一个短语或一个有力的小分句</strong>，让重点自然跳出来。</p><figure><div class="image-slot"><span>在这里粘贴图片，或保留给后续替换</span></div><figcaption>图片说明写在这里：12px 灰色文字，居中显示</figcaption></figure><h2>02 图片之后，说一句就够了</h2><p>每张图之后留一句短说明，交代来源、界面或重点即可。它不抢正文的注意力，但能让图文关系更清楚。</p><p>现在就试着修改这篇示例；右侧手机框会模拟公众号正文区域的阅读效果。</p></div></article></section>
+    <aside class="phone-area"><div class="phone-title"><h2>公众号后台预览</h2><span>按参考图 1220:2816</span></div><div class="phone"><div class="phone-bar">微信公众平台 · 正文预览</div><div class="phone-content"><h1 id="previewTitle"></h1><div id="preview"></div></div></div></aside>
+  </main><div hidden><button id="save"></button><button id="export"></button><button id="openPaste"></button></div><div class="toast" id="toast"></div>
+  <script>
+    const editor = document.getElementById('editor'), title = document.getElementById('title'), preview = document.getElementById('preview'), previewTitle = document.getElementById('previewTitle'), toast = document.getElementById('toast'), status = document.getElementById('saveStatus');
+    const KEY='gzh-one-click-layout-editor-draft-v1', HISTORY_KEY=KEY+'-history'; let savedRange=null, history=[], historyIndex=-1, historyTimer;
+    function sync(){ preview.innerHTML=editor.innerHTML; previewTitle.textContent=title.value || '未命名文章'; localStorage.setItem(KEY,JSON.stringify({title:title.value, html:editor.innerHTML})); status.textContent='已自动保存到这台设备 · 实时同步预览'; }
+    function recordHistory(){const state=JSON.stringify({title:title.value,html:editor.innerHTML});if(history[historyIndex]===state)return;history=history.slice(0,historyIndex+1);history.push(state);if(history.length>120)history.shift();historyIndex=history.length-1;localStorage.setItem(HISTORY_KEY,JSON.stringify({history,historyIndex}));}
+    function restoreHistory(index){if(index<0||index>=history.length)return;historyIndex=index;const state=JSON.parse(history[index]);title.value=state.title;editor.innerHTML=state.html;sync();localStorage.setItem(HISTORY_KEY,JSON.stringify({history,historyIndex}));}
+    function applyHtml(html,newTitle){editor.innerHTML=html;if(newTitle)title.value=newTitle;document.querySelector('.phone-content').scrollTop=0;sync();recordHistory();}
+    function escapeHtml(value){return value.replace(/[&<>\"]/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch]));}
+    function formattedPastedContent(html, plain, detectHeadings){
+      const source=document.createElement('div'); source.innerHTML=html||'';
+      const blocks=[];
+      function walk(node){
+        if(node.nodeType===Node.TEXT_NODE){const t=node.textContent.trim();if(t)blocks.push({type:'text',text:t});return;}
+        if(node.nodeType!==Node.ELEMENT_NODE)return;
+        if(node.tagName==='IMG'){blocks.push({type:'image',src:node.getAttribute('src')||'',alt:node.getAttribute('alt')||''});return;}
+        if(node.tagName==='FIGURE'){const image=node.querySelector('img');if(image)blocks.push({type:'image',src:image.getAttribute('src')||'',alt:image.getAttribute('alt')||''});const cap=node.querySelector('figcaption');if(cap?.textContent.trim())blocks.push({type:'caption',text:cap.textContent.trim()});return;}
+        if(['P','DIV','LI','H1','H2','H3','BLOCKQUOTE'].includes(node.tagName)){const t=node.innerText.trim();if(t)blocks.push({type:'text',text:t,heading:/^H[1-3]$/.test(node.tagName)});for(const img of node.querySelectorAll('img'))blocks.push({type:'image',src:img.getAttribute('src')||'',alt:img.getAttribute('alt')||''});return;}
+        for(const child of node.childNodes)walk(child);
+      }
+      if(source.querySelector('img')){for(const child of source.childNodes)walk(child);}else{const textContent=plain||source.innerText||'';const lines=textContent.split(/\r?\n/);let paragraph=[];const flush=()=>{const text=paragraph.join(' ').trim();if(text)blocks.push({type:'text',text});paragraph=[];};for(const line of lines){const text=line.trim();if(!text){flush();continue;}const isShort=detectHeadings&&text.length<=34&&!/[。！？；，]$/.test(text);if(isShort){flush();blocks.push({type:'text',text,heading:true});}else paragraph.push(text);}flush();}
+      const output=[]; let pendingCaption=false;
+      for(let i=0;i<blocks.length;i++){
+        const block=blocks[i];
+        if(block.type==='image'){output.push(`<figure>${block.src?`<img src="${escapeHtml(block.src)}" alt="${escapeHtml(block.alt)}" />`:`<div class="image-slot"><span>${escapeHtml(block.alt||'图片占位：在这里替换为图片')}</span></div>`}</figure>`);pendingCaption=true;continue;}
+        if(block.type==='caption'){output.push(`<p class="caption">${escapeHtml(block.text)}</p>`);pendingCaption=false;continue;}
+        const text=block.text; if(pendingCaption && !block.heading && text.length<54){output.push(`<p class="caption">${escapeHtml(text)}</p>`);pendingCaption=false;continue;} pendingCaption=false;
+        const isHeading=block.heading || (detectHeadings && text.length<=30 && !/[。！？；，]$/.test(text) && (/(^\d+[.、：\s]|^第[一二三四五六七八九十\d]+[章节部分]|.{0,12}(是什么|为什么|怎么做|如何|总结|结语)$)/.test(text)));
+        if(isHeading){output.push(`<h2>${escapeHtml(text)}</h2>`);continue;}
+        const match=text.match(/^(.*?)([“「『]?[^。！？；，]{5,24}[”」』]?[。！？；])$/);
+        if(match && text.length>38){output.push(`<p>${escapeHtml(match[1])}<strong>${escapeHtml(match[2])}</strong></p>`);}else output.push(`<p>${escapeHtml(text)}</p>`);
+      }
+      return output.join('')||'<p>粘贴内容为空，请先粘贴文章文字或图片。</p>';
+    }
+    function note(text){ toast.textContent=text; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2200); }
+    function remember(){ const s=window.getSelection(); if(s.rangeCount && editor.contains(s.anchorNode)) savedRange=s.getRangeAt(0).cloneRange(); }
+    function wrapSelection(className){
+      const selection=window.getSelection();
+      let range=selection?.rangeCount&&!selection.isCollapsed&&editor.contains(selection.anchorNode)?selection.getRangeAt(0).cloneRange():savedRange;
+      if(!range||range.collapsed||!editor.contains(range.commonAncestorContainer)){note('先在正文中选中要设置的文字');return;}
+      const selectedText=range.toString();
+      if(!selectedText.trim()){note('请选中要设置的文字');return;}
+      const blockFor=node=>{const el=node.nodeType===Node.ELEMENT_NODE?node:node.parentElement;return el?.closest('p,h2,h3,li,blockquote')||null;};
+      const intersected=[...editor.querySelectorAll('p,h2,h3,li,blockquote')].filter(node=>{try{return range.intersectsNode(node);}catch{return false;}});
+      const selectedPlain=selectedText.trim().replace(/\s/g,'');
+      const matchingBlock=intersected.find(node=>node.textContent.replace(/\s/g,'').includes(selectedPlain));
+      const startBlock=blockFor(range.startContainer),endBlock=blockFor(range.endContainer);
+      if(!matchingBlock&&startBlock&&endBlock&&startBlock!==endBlock){note('请在同一段中设置样式，避免改变原有段距');return;}
+      let block=matchingBlock||startBlock||endBlock||intersected[0];
+      const styleSelector='.orange-strong,.caption,.centered-text,.subheading-text,.annotation,.plain-text,strong';
+      const oldStyle=(range.startContainer.nodeType===Node.ELEMENT_NODE?range.startContainer:range.startContainer.parentElement)?.closest(styleSelector);
+      if(oldStyle&&selectedText.trim()===oldStyle.textContent.trim()){
+        const cleanText=document.createTextNode(oldStyle.textContent);
+        oldStyle.replaceWith(cleanText);
+        range=document.createRange();range.setStart(cleanText,0);range.setEnd(cleanText,cleanText.length);
+        selection.removeAllRanges();selection.addRange(range);
+      }
+      if(className==='plain'){
+        const isWholeBlock=block&&selectedText.trim()===block.textContent.trim();
+        if(block&&/^H[23]$/.test(block.tagName)&&selectedText.trim()===block.textContent.trim()){
+          const paragraph=document.createElement('p');paragraph.innerHTML=block.innerHTML;block.replaceWith(paragraph);block=paragraph;
+          range=document.createRange();range.selectNodeContents(block);selection.removeAllRanges();selection.addRange(range);
+        }
+        if(block?.tagName==='P'){
+          if(isWholeBlock){block.classList.remove('caption','caption-center','centered-block','centered-text');block.style.cssText='margin:0 0 20px;color:#333;font-family:PingFang SC,-apple-system,Microsoft YaHei,sans-serif;font-size:15px;font-weight:400;letter-spacing:1px;line-height:1.85;text-align:justify;';}
+        }
+        const plain=document.createElement('span');plain.className='plain-text';plain.textContent=range.toString();
+        plain.style.cssText='color:#333;font-size:15px;font-weight:400;letter-spacing:1px;font-style:normal;text-decoration:none;';
+        range.deleteContents();range.insertNode(plain);
+      }else{
+        if(block?.tagName==='P'&&(className==='caption'||className==='centered-text')){
+          if(className==='caption'){
+            block.classList.remove('centered-block');block.classList.add('caption-center');block.style.textAlign='center';
+          }else if(className==='centered-text'){
+            block.classList.remove('caption-center');block.classList.add('centered-block');block.style.textAlign='center';
+          }
+        }else if(block?.tagName==='P'&&selectedText.trim()===block.textContent.trim()){
+          block.classList.remove('caption-center','centered-block');block.style.textAlign='justify';
+        }
+        if(className==='subheading-text'){
+          if(block?.tagName==='P'){
+            const beforeRange=document.createRange();beforeRange.selectNodeContents(block);beforeRange.setEnd(range.startContainer,range.startOffset);
+            const afterRange=document.createRange();afterRange.selectNodeContents(block);afterRange.setStart(range.endContainer,range.endOffset);
+            const before=beforeRange.cloneContents(),after=afterRange.cloneContents();
+            const heading=document.createElement('h2');heading.textContent=selectedText.trim();
+            const nodes=[];
+            if(before.textContent.trim()){const p=document.createElement('p');p.append(before);nodes.push(p);}
+            nodes.push(heading);
+            if(after.textContent.trim()){const p=document.createElement('p');p.append(after);nodes.push(p);}
+            block.replaceWith(...nodes);
+            range=document.createRange();range.selectNodeContents(heading);selection.removeAllRanges();selection.addRange(range);
+          }else if(block?.tagName!=='H2'){
+            const heading=document.createElement('span');heading.className=className;
+            const bar=document.createElement('span');bar.className='subheading-mark';bar.setAttribute('aria-hidden','true');
+            const label=document.createElement('span');label.className='subheading-label';label.appendChild(range.extractContents());heading.append(bar,label);range.insertNode(heading);
+          }
+        }else{
+          const marker=document.createElement('span');marker.className=className;marker.appendChild(range.extractContents());range.insertNode(marker);
+        }
+      }
+      sync();recordHistory();
+    }
+    function addAnnotation(text){const range=findTextRange(text);if(!range)return false;const span=document.createElement('span');span.className='annotation';span.dataset.annotation='true';try{range.surroundContents(span);}catch{const fragment=range.extractContents();span.appendChild(fragment);range.insertNode(span);}return true;}
+    function findTextRange(text){const walker=document.createTreeWalker(editor,NodeFilter.SHOW_TEXT,{acceptNode(node){return node.parentElement?.closest('.annotation,.annotation-remove')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});let nodes=[],full='';while(walker.nextNode()){nodes.push({node:walker.currentNode,start:full.length,end:full.length+walker.currentNode.textContent.length});full+=walker.currentNode.textContent;}const at=full.indexOf(text);if(at<0)return null;const end=at+text.length,startNode=nodes.find(item=>at>=item.start&&at<item.end),endNode=nodes.find(item=>end>item.start&&end<=item.end);if(!startNode||!endNode)return null;const range=document.createRange();range.setStart(startNode.node,at-startNode.start);range.setEnd(endNode.node,end-endNode.start);return range;}
+    function put(html){ editor.focus(); const range=savedRange || document.createRange(); if(!savedRange){range.selectNodeContents(editor);range.collapse(false)} range.deleteContents(); const box=document.createElement('div');box.innerHTML=html; const frag=document.createDocumentFragment();let last;while(box.firstChild){last=frag.appendChild(box.firstChild)} range.insertNode(frag); const next=document.createRange(); next.setStartAfter(last);next.collapse(true); const s=window.getSelection();s.removeAllRanges();s.addRange(next);savedRange=next;sync();recordHistory(); }
+    document.querySelectorAll('.tool').forEach(b=>b.addEventListener('mousedown',e=>{remember();e.preventDefault();}));
+    document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>{ const x=b.dataset.action; const styles={subheading:'subheading-text',emphasis:'orange-strong',paragraph:'plain',center:'centered-text',caption:'caption'};wrapSelection(styles[x]);}));
+    editor.addEventListener('input',()=>{sync();clearTimeout(historyTimer);historyTimer=setTimeout(recordHistory,350);}); title.addEventListener('input',()=>{sync();clearTimeout(historyTimer);historyTimer=setTimeout(recordHistory,350);}); editor.addEventListener('keyup',remember); editor.addEventListener('mouseup',remember); editor.addEventListener('focus',remember); document.querySelector('.phone-content').addEventListener('wheel',event=>event.stopPropagation(),{passive:true});
+    document.addEventListener('keydown',event=>{if(!(event.metaKey||event.ctrlKey)||event.key.toLowerCase()!=='z')return;const target=event.target;if(target===pasteInput||target instanceof HTMLInputElement||target instanceof HTMLTextAreaElement)return;event.preventDefault();event.stopImmediatePropagation();clearTimeout(historyTimer);if(event.shiftKey){if(historyIndex<history.length-1)restoreHistory(historyIndex+1);}else if(historyIndex>0)restoreHistory(historyIndex-1);},true);
+    document.getElementById('save').onclick=()=>{sync();note('草稿已保存在当前浏览器');};
+    function inlineArticle(){ const holder=document.createElement('div'); holder.innerHTML=editor.innerHTML; const base='font-family:PingFang SC,-apple-system,BlinkMacSystemFont,Microsoft YaHei,sans-serif;'; holder.querySelectorAll('p').forEach(n=>n.style.cssText=base+'margin:0 0 20px;color:#333;font-size:15px;font-weight:400;letter-spacing:1px;line-height:1.85;text-align:justify;'); holder.querySelectorAll('h2').forEach(n=>n.style.cssText=base+'margin:36px 0 20px;padding-left:10px;border-left:4px solid #fa8c16;color:#111;font-size:20px;font-weight:700;letter-spacing:1px;line-height:1.35;'); holder.querySelectorAll('h3').forEach(n=>n.style.cssText=base+'margin:27px 0 12px;color:#222;font-size:18px;font-weight:700;line-height:1.4;'); holder.querySelectorAll('strong,.orange-strong').forEach(n=>n.style.cssText='color:#fa8c16;font-weight:700;'); holder.querySelectorAll('p.caption').forEach(n=>n.style.cssText=base+'margin:0 0 20px;color:#b2b2b2;font-size:12px;font-weight:400;letter-spacing:.5px;line-height:1.85;text-align:center;'); holder.querySelectorAll('span.caption').forEach(n=>n.style.cssText='color:#b2b2b2;font-size:12px;font-weight:400;letter-spacing:.5px;');holder.querySelectorAll('.centered-text').forEach(n=>n.style.textAlign='center');holder.querySelectorAll('p.centered-block,p.caption-center').forEach(n=>n.style.textAlign='center');holder.querySelectorAll('.plain-text').forEach(n=>n.style.cssText='color:#333;font-size:15px;font-weight:400;letter-spacing:1px;font-style:normal;text-decoration:none;');holder.querySelectorAll('.subheading-text').forEach(n=>{n.style.cssText=base+'display:inline-flex;align-items:center;gap:8px;max-width:100%;color:#222;font-size:20px;font-weight:700;line-height:1.35;vertical-align:middle;';let bar=n.querySelector(':scope > .subheading-mark'),label=n.querySelector(':scope > .subheading-label');if(!bar){bar=document.createElement('span');bar.className='subheading-mark';bar.setAttribute('aria-hidden','true');label=document.createElement('span');label.className='subheading-label';while(n.firstChild)label.appendChild(n.firstChild);n.append(bar,label);}bar.style.cssText='display:inline-block;flex:0 0 4px;align-self:stretch;min-height:1em;background:#fa8c16;';label.style.cssText='min-width:0;';});holder.querySelectorAll('figure').forEach(n=>n.style.cssText='margin:26px 0 20px;'); holder.querySelectorAll('img').forEach(n=>n.style.cssText=n.classList.contains('image-narrow')?'display:block;width:311px;max-width:100%;height:auto;margin:0 auto;':'display:block;width:100%;height:auto;'); holder.querySelectorAll('figcaption').forEach(n=>n.style.cssText=base+'display:block;margin:8px 0 0;color:#b2b2b2;font-size:12px;font-weight:400;letter-spacing:.5px;line-height:1.65;text-align:center;'); holder.querySelectorAll('.image-slot').forEach(n=>n.style.cssText='display:flex;align-items:center;justify-content:center;width:100%;min-height:150px;border:1px dashed #d8b47e;background:#fff8ed;color:#b98640;font-size:13px;text-align:center;'); return holder.innerHTML; }
+    async function copy(){ const html=inlineArticle(); const plain=editor.innerText; try{await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([plain],{type:'text/plain'})})]);note('已复制富文本，可直接粘贴到公众号正文');}catch(e){const h=document.createElement('div');h.contentEditable=true;h.style.position='fixed';h.style.opacity='0';h.innerHTML=html;document.body.append(h);const r=document.createRange();r.selectNodeContents(h);const s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand('copy');h.remove();note('已用兼容模式复制 HTML');}}
+    document.getElementById('copy').onclick=copy; document.getElementById('export').onclick=()=>{const blob=new Blob(['<!doctype html><meta charset="utf-8"><article>'+inlineArticle()+'</article>'],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(title.value||'公众号文章')+'.html';a.click();URL.revokeObjectURL(a.href);note('HTML 文件已导出');};
+    const pastePanel=document.getElementById('pastePanel'), pasteInput=document.getElementById('pasteInput'); function openPaste(){pastePanel.classList.toggle('open');if(pastePanel.classList.contains('open'))pasteInput.focus();} document.getElementById('openPaste').onclick=openPaste; document.getElementById('openPasteMobile').onclick=openPaste; document.getElementById('closePaste').onclick=()=>pastePanel.classList.remove('open');
+    pasteInput.addEventListener('paste',event=>{const data=event.clipboardData;if(!data)return;const html=data.getData('text/html');const plain=data.getData('text/plain');if(html){event.preventDefault();const start=pasteInput.selectionStart,end=pasteInput.selectionEnd;pasteInput.setRangeText(plain||html.replace(/<[^>]*>/g,' '),start,end,'end');pasteInput.dataset.richHtml=html;const transferImages=[...data.items].filter(item=>item.type.startsWith('image/'));transferImages.forEach(item=>{const file=item.getAsFile();if(file){const reader=new FileReader();reader.onload=()=>{pasteInput.dataset.images=(pasteInput.dataset.images||'')+`<img src="${reader.result}" alt="粘贴的图片" />`;};reader.readAsDataURL(file);}});note('已接收图文剪贴板内容，点击“排版并载入文章”');return;}const images=[...data.items].filter(item=>item.type.startsWith('image/'));if(!images.length)return;event.preventDefault();images.forEach(item=>{const file=item.getAsFile();if(!file)return;const reader=new FileReader();reader.onload=()=>{pasteInput.dataset.images=(pasteInput.dataset.images||'')+`<img src="${reader.result}" alt="粘贴的图片" />`;};reader.readAsDataURL(file);});note('已接收图片，点击“排版并载入文章”');});
+    document.getElementById('formatPaste').onclick=()=>{const html=pasteInput.dataset.richHtml||pasteInput.dataset.images||'';const formatted=formattedPastedContent(html,pasteInput.value,document.getElementById('detectHeadings').checked);editor.innerHTML=formatted;const first=editor.querySelector('h2');if(first && (!title.value.trim()||title.value==='用一个编辑器，把公众号排版变成顺手的事'))title.value=first.textContent;sync();recordHistory();pastePanel.classList.remove('open');note('已按公众号格式整理，检查预览后可复制到公众号');};
+    const draft=localStorage.getItem(KEY);if(draft){try{const d=JSON.parse(draft);title.value=d.title||title.value;editor.innerHTML=d.html||editor.innerHTML;}catch{}}try{const old=JSON.parse(localStorage.getItem(HISTORY_KEY)||'null');if(old?.history?.length){history=old.history;historyIndex=old.historyIndex;}}catch{}if(!history.length)recordHistory();sync();
+  </script>
+</body>
+</html>
