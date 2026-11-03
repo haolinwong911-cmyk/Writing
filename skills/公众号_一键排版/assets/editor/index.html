@@ -27,7 +27,7 @@
     .button.small { padding:7px 10px; font-size:12px; }
     .button { border:1px solid #ded8cf; border-radius:9px; padding:9px 12px; background:#fff; color:#48423b; font-size:13px; }
     .button.primary { background:var(--orange); border-color:var(--orange); color:#fff; font-weight:650; }
-    .layout { width:100%; height:100vh; margin:0; display:grid; grid-template-columns:270px minmax(0,1fr) minmax(330px,390px); min-height:0; overflow:hidden; }
+    .layout { width:100%; height:100vh; margin:0; display:grid; grid-template-columns:270px minmax(0,1fr) minmax(400px,420px); min-height:0; overflow:hidden; }
     .layout > aside:first-child { position:relative; top:auto; align-self:stretch; height:100vh; min-height:0; overflow-y:auto; padding:20px 22px 28px; border-right:1px solid var(--line); background:#faf8f4; }
     .sidebar-brand { margin:-20px -22px 20px; padding:18px 20px; border-bottom:1px solid var(--line); background:var(--paper); }
     .sidebar-brand .brand { font-size:17px; line-height:1.35; }
@@ -68,7 +68,8 @@
     .phone-title { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
     .phone-title h2 { margin:0; font-size:14px; }
     .phone-title span { color:#8b857d; font-size:12px; }
-    .phone { width:min(100%, 354px, calc((100vh - 132px) * .433)); aspect-ratio:1220 / 2816; height:auto; min-height:0; margin:0 auto; overflow:hidden; border:9px solid #252525; border-radius:32px; background:#fff; box-shadow:0 14px 30px rgba(0,0,0,.14); }
+    /* 预览正文宽度固定为约 320px：按 15px 正文 + 1px 字距计算，约等于每行 20 个中文字。 */
+    .phone { width:min(100%, 372px); aspect-ratio:1220 / 2816; height:auto; min-height:0; margin:0 auto; overflow:hidden; border:9px solid #252525; border-radius:32px; background:#fff; box-shadow:0 14px 30px rgba(0,0,0,.14); }
     .phone-bar { height:42px; padding:12px 15px; color:#333; font-size:11px; text-align:center; }
     .phone-content { padding:14px 17px 30px; transform-origin:top left; height:calc(100% - 42px); overflow-y:scroll; overscroll-behavior:contain; }
     .phone-content h1 { margin:0 0 16px; color:#111; font-size:21px; line-height:1.35; }
@@ -95,7 +96,7 @@
     #editor p.centered-block, #preview p.centered-block, #editor p.caption-center, #preview p.caption-center { text-align:center !important; }
     .phone-content #preview .centered-text { text-align:center; }
     .phone-content #preview .subheading-text { color:#222; font-size:20px; font-weight:700; line-height:1.45; }
-    @media (max-width:1120px) and (min-width:901px) { .layout{grid-template-columns:235px minmax(0,1fr) 320px;} .layout > aside:first-child{padding-left:17px;padding-right:17px;} .sidebar-brand{margin-left:-17px;margin-right:-17px;} .workspace{padding:22px 16px;} .phone-area{padding:18px 10px;} }
+    @media (max-width:1120px) and (min-width:901px) { .layout{grid-template-columns:235px minmax(0,1fr) 400px;} .layout > aside:first-child{padding-left:17px;padding-right:17px;} .sidebar-brand{margin-left:-17px;margin-right:-17px;} .workspace{padding:22px 16px;} .phone-area{padding:18px 10px;} }
     @media (max-width:900px) { body{overflow:auto;} .layout{height:auto;min-height:100vh;overflow:visible;grid-template-columns:220px minmax(0,1fr);} .layout > aside:first-child,.workspace{height:100vh;} .phone-area{display:none;} }
     @media (max-width:700px) { .layout{display:block;} .layout > aside:first-child{display:none;} .workspace-tools{display:block;} .workspace{height:auto;min-height:100vh;padding:18px 0;} .paper{padding:28px 22px;box-shadow:none;} }
   </style>
