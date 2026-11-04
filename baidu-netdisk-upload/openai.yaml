@@ -1,0 +1,3 @@
+interface:
+  display_name: "百度网盘上传"
+  short_description: "分步授权、选择文件并上传到百度网盘"
