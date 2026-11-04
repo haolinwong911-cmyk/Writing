@@ -1,5 +1,5 @@
 ---
-name: 儿童新闻音频制作
+name: children-news-audio
 description: 为《少年新知》策划、筛选并制作面向小学四至六年级的儿童新闻音频口播稿，按用户指定日期保存逐字稿和每日选题筛选日志。
 metadata:
   short-description: 少年新知儿童新闻音频制作
