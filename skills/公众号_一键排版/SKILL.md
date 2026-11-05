@@ -15,6 +15,10 @@ When the current machine already has the user's editor at `/Users/haolinwong/Doc
 
 ## Workflow
 
+### Fast path (default)
+
+For a warmed local editor, use the fast path: reuse the existing server on port 4174 and the existing browser tab, write the completed `{title, html}` draft into the editor's `localStorage` key `gzh-one-click-layout-editor-draft-v1`, reload the tab, and verify only that the title and first body block are present. Do not reopen the installation instructions, create a new browser tab, take a screenshot, or perform a full visual review unless the user asks for verification. If the server is not running, start it as a background process and reuse it for later requests; never leave a foreground server command attached to the task.
+
 1. **Find and read the source.** Use the path, Obsidian vault context, or attachments supplied in the request. Read the complete article and identify its title, section breaks, paragraph boundaries, images, and any image captions. For Markdown/HTML/MHTML, preserve image order and resolve local image links from the source folder or vault. Do not drop images, captions, lists, links, quotations, or text. If an image is unavailable, leave a clear image placeholder at its original position rather than moving surrounding content.
 2. **Apply the user's layout profile.** Make formatting decisions from the article's structure and the rules below. Keep the original wording, facts, order, and paragraph structure. Do not split, merge, or rewrite paragraphs to make styling easier. Do not over-style: use orange emphasis sparingly and only on a short phrase or meaningful clause.
 3. **Load the formatted article into the editor.** Use the installed editor's browser UI and preserve the provided image/text order. Keep the three-column editor and phone preview. Use local images where available. Do not create or deploy a website.
